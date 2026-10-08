@@ -15,6 +15,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { getAgentDir, getShellConfig } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { waitForBackgroundResult } from "./headless.ts";
 
 type ExtensionMode = ExtensionContext["mode"];
 import {
@@ -412,16 +413,33 @@ export default function asyncBash(pi: ExtensionAPI): void {
 		return { entries: [draft], continue: true };
 	};
 
+	const finishHeadlessTurn = async (outcome: string, ctx: ExtensionContext) => {
+		const ready = boundaryDelivery(outcome, ctx);
+		if (ready || outcome !== "completed" || (ctx.mode !== "print" && ctx.mode !== "json")) return ready;
+		const mgr = managerFor(ctx);
+		if (!mgr || ctx.signal?.aborted) return undefined;
+		await waitForBackgroundResult(mgr, ctx.signal);
+		if (ctx.signal?.aborted || managerFor(ctx) !== mgr) return undefined;
+		return boundaryDelivery(outcome, ctx);
+	};
+
 	pi.on("session_start", (_event, ctx) => {
 		ctxRef = ctx;
 		getConfig(ctx);
 	});
 	pi.on("turn_end", (event, ctx) => {
 		ctxRef = ctx;
+		// A headless host may shut down at agent_end, before agent_before_settle. Hold only
+		// the final assistant turn; tool turns and queued work must remain free to continue.
+		const finalAnswer = event.message?.role === "assistant" && !event.message.content.some((block) => block.type === "toolCall");
+		if (finalAnswer && !event.continue && !event.context?.pendingMessages.length) {
+			return finishHeadlessTurn(event.outcome, ctx);
+		}
 		return boundaryDelivery(event.outcome, ctx);
 	});
 	pi.on("agent_before_settle", (event, ctx) => {
 		ctxRef = ctx;
+		if (!event.continue && !event.context?.pendingMessages.length) return finishHeadlessTurn(event.outcome, ctx);
 		return boundaryDelivery(event.outcome, ctx);
 	});
 	pi.on("agent_start", (_event, ctx) => {
@@ -570,6 +588,7 @@ export default function asyncBash(pi: ExtensionAPI): void {
 			"You can inspect PI_* environment variables for current model and session details.",
 			"bash waits briefly for a command (about 2 s by default); if it is still running, the result says it moved to the background as a job. That job has NOT completed: wait for the completion notice (or bash_job wait) before relying on its outcome.",
 			"Use run_in_background for servers, watchers, and long builds instead of shell `&`; stop jobs you no longer need with bash_job stop.",
+			"In headless runs, pending background jobs are joined before the process exits. Stop servers and watchers you no longer need before finishing your task.",
 		],
 		parameters: bashSchema,
 		outputSchema: bashOutputSchema,

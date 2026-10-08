@@ -44,7 +44,7 @@ pi --bash-foreground-ms off    # Only background when explicitly requested
 
 Or set `PI_ASYNC_BASH_FOREGROUND_MS`. The flag takes precedence.
 
-Jobs belong to the session: **quitting, switching sessions, or reloading stops them**. Automatic handoff defaults to off in one-shot print/JSON mode. Process cleanup covers the process group, not escaped daemons.
+Jobs belong to the session: **quitting, switching sessions, or reloading stops them**. In print/JSON mode, handoff is opt-in with `--bash-foreground-ms 2000`; pending job results are delivered before the run exits. Stop unneeded servers and watchers before finishing. Process cleanup covers the process group, not escaped daemons.
 
 This extension replaces ordinary Pi `bash`, not `!` commands.
 

@@ -85,7 +85,8 @@ describe("Pi integration (faux provider)", () => {
 			sessionManager: SessionManager.inMemory(cwd),
 			settingsManager,
 		}));
-		await session.bindExtensions({});
+		// These tests exercise a long-lived session (including model switches), not one-shot print.
+		await session.bindExtensions({ mode: "rpc" });
 	});
 
 	after(() => {
