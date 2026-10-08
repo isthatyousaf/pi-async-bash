@@ -46,6 +46,6 @@ Or set `PI_ASYNC_BASH_FOREGROUND_MS`. The flag takes precedence.
 
 Jobs belong to the session: **quitting, switching sessions, or reloading stops them**. Automatic handoff defaults to off in one-shot print/JSON mode. Process cleanup covers the process group, not escaped daemons.
 
-This extension replaces ordinary Pi `bash`, not `!` commands. It does not modify `pi-codex-conversion` or its execution tools.
+This extension replaces ordinary Pi `bash`, not `!` commands.
 
 [Behavior, limits & development](docs/reference.md) · [MIT license](LICENSE)

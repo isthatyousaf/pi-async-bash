@@ -84,9 +84,9 @@ From Pi's builtin `bash`:
 
 ## Compatibility
 
-- Pi lets a registered extension tool replace a builtin tool of the same name. `tool_call` handlers such as `long-sleep-guard.ts` still see `toolName: "bash"` and `input.command` before execution, and can block it. `bash_job` cannot launch processes, so it is not a way around those guards.
-- The extension never calls `setActiveTools`. If pi-codex-conversion hides `bash` by active-tool projection, `bash` stays registered and hidden. `bash_job` is not a default tool, so the projection keeps it active. Jobs started before a switch to Codex tools stay manageable.
-- It registers no `exec`, `wait`, `exec_command`, `write_stdin` or other Codex tool.
+- Replaces `bash` and adds `bash_job`. No other tools are replaced, and the extension does not change the active tool set.
+- Existing `tool_call` guards still see `toolName: "bash"` and `input.command` before execution, and can block it. `bash_job` cannot launch processes.
+- Jobs remain attached to the same session when you switch models.
 
 ## Activation and rollback
 
