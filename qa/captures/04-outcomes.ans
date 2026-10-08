@@ -1,0 +1,46 @@
+ Done.
+
+[48;2;33;59;73m
+ [38;2;222;224;225mrun true[39m
+
+
+[49m [38;2;104;183;141m●[39m [1mBash[0m(true)
+ [38;2;126;136;142m  ⎿  (No output)[39m
+
+ Done.
+
+[48;2;33;59;73m
+ [38;2;222;224;225mrun echo "warning: unused import" >&2; echo "error: build failed"; exit 2[39m
+
+
+[49m [38;2;234;127;129m●[39m [1mBash[0m(echo "warning: unused import" >&2; echo "error: build failed"; exit 2)
+ [38;2;126;136;142m  ⎿  [38;2;157;165;169mwarning: unused import[39m
+      [38;2;157;165;169merror: build failed
+[39m      [38;2;234;127;129mExit code 2[39m
+
+ Done.
+
+[48;2;33;59;73m
+ [38;2;222;224;225mto 1 echo starting; sleep 5[39m
+
+
+[49m [38;2;205;154;34m●[39m [1mBash[0m(echo starting; sleep 5)
+ [38;2;126;136;142m  ⎿  [38;2;157;165;169mstarting[39m
+      [38;2;205;154;34mTimed out after 1.0s[39m
+
+ Done.
+
+[48;2;33;59;73m
+ [38;2;222;224;225mrun printf "no trailing newline"[39m
+
+
+[49m [38;2;104;183;141m●[39m [1mBash[0m(printf "no trailing newline")
+ [38;2;126;136;142m  ⎿  [38;2;157;165;169mno trailing newline
+
+[39m Done.
+
+[38;2;108;118;123m────────────────────────────────────────────────────────────────────────────────────────────────────
+[7m[39m [0m
+[38;2;108;118;123m────────────────────────────────────────────────────────────────────────────────────────────────────
+[38;2;126;136;142m/tmp/pab-qa/cwd[39m
+[38;2;126;136;142m↑2.2k ↓73 R19k W2.2k CH97.8% 1.7%/128k                                                        faux-1

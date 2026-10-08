@@ -1,0 +1,22 @@
+
+ ● Bash(echo light; exit 2)
+   ⎿  light
+      Exit code 2
+
+ Done.
+
+
+ bg sleep 30
+
+
+ ● Bash(sleep 30)
+   ⎿  Running in the background (1s) · alt+j to manage
+
+ Done.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+ ● sleep 30 · 1s · alt+j to manage
+/tmp/pab-qa/cwd
+↑2.1k ↓27 R6.0k W2.1k CH91.2% 1.7%/128k                                                       faux-1

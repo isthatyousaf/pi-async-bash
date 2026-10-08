@@ -1,0 +1,30 @@
+
+ run for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done
+
+
+ ● Bash(for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done)
+   ⎿  Running in the background (4s) · alt+j to manage
+
+ Done.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+ ● for i in $(seq 1 40); do echo "compiling module $i"; sleep 0… · 4s · alt+j to manage
+/tmp/pab-qa/cwd
+↑2.2k ↓25 R2.0k W2.2k CH84.8% 1.8%/128k                                                       faux-1

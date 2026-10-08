@@ -1,0 +1,46 @@
+ Done.
+
+
+ run true
+
+
+ ● Bash(true)
+   ⎿  (No output)
+
+ Done.
+
+
+ run echo "warning: unused import" >&2; echo "error: build failed"; exit 2
+
+
+ ● Bash(echo "warning: unused import" >&2; echo "error: build failed"; exit 2)
+   ⎿  warning: unused import
+      error: build failed
+      Exit code 2
+
+ Done.
+
+
+ to 1 echo starting; sleep 5
+
+
+ ● Bash(echo starting; sleep 5)
+   ⎿  starting
+      Timed out after 1.0s
+
+ Done.
+
+
+ run printf "no trailing newline"
+
+
+ ● Bash(printf "no trailing newline")
+   ⎿  no trailing newline
+
+ Done.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+/tmp/pab-qa/cwd
+↑2.2k ↓73 R19k W2.2k CH97.8% 1.7%/128k                                                        faux-1

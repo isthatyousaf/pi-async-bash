@@ -1,0 +1,34 @@
+[48;2;33;59;73m
+ [38;2;222;224;225mdesc Start the dev server :: for i in $(seq 1 500); do echo "GET /api/items 200 ${i}ms"; sleep 0.2; done[39m
+
+
+[49m [38;2;167;152;215m●[39m [1mBash[0m(for i in $(seq 1 500); do echo "GET /api/items 200 ${i}ms"; sleep 0.2; done)
+ [38;2;126;136;142m  ⎿  [38;2;157;165;169mRunning in the background (6s)[38;2;126;136;142m · alt+j to manage[39m
+
+[48;2;33;59;73m
+ [38;2;222;224;225mtwo sleep 3; echo "数据 ✓ wide glyphs 🚀" || sleep 3; echo "tests failed"; exit 1[39m
+
+
+[49m [38;2;104;183;141m●[39m [1mBash[0m(sleep 3; echo "数据 ✓ wide glyphs 🚀")
+ [38;2;126;136;142m  ⎿  [38;2;104;183;141mDone[38;2;126;136;142m · ran in the background · 3.0s[39m
+
+ [38;2;234;127;129m●[39m [1mBash[0m(sleep 3; echo "tests failed"; exit 1)
+ [38;2;126;136;142m  ⎿  [38;2;234;127;129mExit code 1[38;2;126;136;142m · ran in the background · 3.0s[39m
+
+ Done.
+
+ [38;2;234;127;129m●[39m [38;2;222;224;225m2 background commands finished[39m
+ [38;2;126;136;142m  ⎿  [38;2;104;183;141m●[39m [38;2;222;224;225msleep 3; echo "数据 ✓ wide glyphs 🚀"[38;2;126;136;142m · [38;2;157;165;169mcompleted[38;2;126;136;142m · 3.0s[39m
+      [38;2;234;127;129m●[39m [38;2;222;224;225msleep 3; echo "tests failed"; exit 1[38;2;126;136;142m · [38;2;234;127;129mfailed with exit code 1[38;2;126;136;142m · 3.0s[39m
+      [38;2;126;136;142mctrl+o to expand[39m
+
+ Noted the background result.
+
+
+
+[38;2;108;118;123m──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+[7m[39m [0m
+[38;2;108;118;123m──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+[39m [38;2;167;152;215m●[39m [38;2;157;165;169mStart the dev server[38;2;126;136;142m · 6s · alt+j to manage[39m
+[38;2;126;136;142m/tmp/pab-qa/cwd[39m
+[38;2;126;136;142m↑2.5k ↓72 R6.6k W2.5k CH90.5% 2.1%/128k                                                                 faux-1

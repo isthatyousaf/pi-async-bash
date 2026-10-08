@@ -1,0 +1,30 @@
+
+ run for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done
+
+
+ ● Bash(for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done)
+   ⎿  Done · ran in the background · 10s
+
+ Done.
+
+ ● Background command completed · 10s
+   ⎿  $ for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done
+      … +17 lines (ctrl+o to expand)
+      compiling module 38
+      compiling module 39
+      compiling module 40
+
+ Noted the background result.
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+/tmp/pab-qa/cwd
+↑2.3k ↓32 R4.1k W2.3k CH85.5% 2.0%/128k                                                       faux-1

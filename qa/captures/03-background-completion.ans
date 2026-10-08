@@ -1,0 +1,30 @@
+[48;2;33;59;73m
+ [38;2;222;224;225mrun for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done[39m
+
+
+[49m [38;2;104;183;141m●[39m [1mBash[0m(for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done)
+ [38;2;126;136;142m  ⎿  [38;2;104;183;141mDone[38;2;126;136;142m · ran in the background · 10s[39m
+
+ Done.
+
+ [38;2;104;183;141m●[39m [38;2;222;224;225mBackground command completed[38;2;126;136;142m · 10s[39m
+ [38;2;126;136;142m  ⎿  $ for i in $(seq 1 40); do echo "compiling module $i"; sleep 0.25; done[39m
+      [38;2;126;136;142m… +17 lines (ctrl+o to expand)[39m
+      [38;2;157;165;169mcompiling module 38
+[39m      [38;2;157;165;169mcompiling module 39
+[39m      [38;2;157;165;169mcompiling module 40
+
+[39m Noted the background result.
+
+
+
+
+
+
+
+
+[38;2;108;118;123m────────────────────────────────────────────────────────────────────────────────────────────────────
+[7m[39m [0m
+[38;2;108;118;123m────────────────────────────────────────────────────────────────────────────────────────────────────
+[38;2;126;136;142m/tmp/pab-qa/cwd[39m
+[38;2;126;136;142m↑2.3k ↓32 R4.1k W2.3k CH85.5% 2.0%/128k                                                       faux-1

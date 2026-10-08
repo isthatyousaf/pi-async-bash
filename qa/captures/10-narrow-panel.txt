@@ -1,0 +1,30 @@
+
+ ● Bash(for i in $(seq 1 500); do echo "GET /ap…
+   ⎿  Running in the background (12s) · alt+j to…
+
+╭─ Shell jobs ─────────────────────── 1 running ─╮
+│ › ● Start the dev server                   12s │
+│   ● sleep 3; echo "tests …  Exit code 1 · 3.0s │
+│   ● sleep 3; echo "数据 ✓ wide g…  Done · 3.0s │
+├────────────────────────────────────────────────┤
+│ $ for i in $(seq 1 500); do echo "GET          │
+│ /api/items 200 ${i}ms"; sleep 0.2; done        │
+│ Start the dev server                           │
+│ running 12s · no deadline · background · job-… │
+│ log /tmp/pab-qa/logs/01a11a24-0e24-7434-83ee-… │
+├────────────────────────────────────────────────┤
+│ ↑ 51 more                                      │
+│ GET /api/items 200 53ms                        │
+│ GET /api/items 200 54ms                        │
+│ GET /api/items 200 55ms                        │
+│ GET /api/items 200 56ms                        │
+│ GET /api/items 200 57ms                        │
+│ GET /api/items 200 58ms                        │
+│ GET /api/items 200 59ms                        │
+│ GET /api/items 200 60ms                        │
+╰─ ↑↓ · PgUp/Dn · x stop · esc ──────────────────╯
+
+──────────────────────────────────────────────────
+ ● Start the dev server · 12s · alt+j to manage
+/tmp/pab-qa/cwd
+↑2.5k ↓72 R6.6k W2.5k CH90.5% 2.1%/128k     faux-1

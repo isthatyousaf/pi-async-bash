@@ -1,0 +1,38 @@
+{
+  "name": "pi-async-bash",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pi extension: bash with automatic background handoff and session-owned jobs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/isthatyousaf/pi-async-bash.git"
+  },
+  "homepage": "https://github.com/isthatyousaf/pi-async-bash#readme",
+  "bugs": {
+    "url": "https://github.com/isthatyousaf/pi-async-bash/issues"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "type": "module",
+  "keywords": ["pi-package"],
+  "pi": {
+    "extensions": ["./src/index.ts"]
+  },
+  "scripts": {
+    "link-pi": "sh scripts/link-pi.sh",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "node --test --test-concurrency=1 test/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*"
+  }
+}

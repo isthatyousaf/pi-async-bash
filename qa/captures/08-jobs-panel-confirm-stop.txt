@@ -1,0 +1,34 @@
+
+ desc Start the dev server :: for i in $(seq 1 500); do echo "GET /api/items 200 ${i}ms"; sleep 0.2; done
+
+
+ ● Bash(for i in $(seq 1 500); do echo "GET /api/items 200 ${i}ms"; sleep 0.2; done)
+   ⎿  Ru╭─ Shell jobs ─────────────────────────────────────────────────────────────────── 1 running ─╮
+        │ › ● Start the dev server                                                                9s │
+        │   ● sleep 3; echo "tests failed"; exit 1                                Exit code 1 · 3.0s │
+ two sle│   ● sleep 3; echo "数据 ✓ wide glyphs 🚀"                                      Done · 3.0s │
+        ├────────────────────────────────────────────────────────────────────────────────────────────┤
+        │ $ for i in $(seq 1 500); do echo "GET /api/items 200 ${i}ms"; sleep 0.2; done              │
+ ● Bash(│ Start the dev server                                                                       │
+   ⎿  Do│ running 9s · no deadline · background · job-1-704b · pid 350111                            │
+        │ log /tmp/pab-qa/logs/01a11a24-0e24-7434-83ee-7dbc8fa6115b-LhuYAR/job-1-704b.log            │
+ ● Bash(├────────────────────────────────────────────────────────────────────────────────────────────┤
+   ⎿  Ex│ ↑ 17 more                                                                                  │
+        │ GET /api/items 200 19ms                                                                    │
+ Done.  │ GET /api/items 200 20ms                                                                    │
+        │ GET /api/items 200 21ms                                                                    │
+ ● 2 bac│ GET /api/items 200 22ms                                                                    │
+   ⎿  ● │ GET /api/items 200 23ms                                                                    │
+      ● │ GET /api/items 200 24ms                                                                    │
+      ct│ GET /api/items 200 25ms                                                                    │
+        │ GET /api/items 200 26ms                                                                    │
+ Noted t│ GET /api/items 200 27ms                                                                    │
+        │ GET /api/items 200 28ms                                                                    │
+        │ ↓ 16 more · End to follow                                                                  │
+        ╰─ Stop "Start the dev server"? x to confirm · any other key cancels ────────────────────────╯
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ ● Start the dev server · 9s · alt+j to manage
+/tmp/pab-qa/cwd
+↑2.5k ↓72 R6.6k W2.5k CH90.5% 2.1%/128k                                                                 faux-1

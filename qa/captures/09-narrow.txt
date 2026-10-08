@@ -1,0 +1,30 @@
+
+ ● Bash(for i in $(seq 1 500); do echo "GET /ap…
+   ⎿  Running in the background (11s) · alt+j to…
+
+
+ two sleep 3; echo "数据 ✓ wide glyphs 🚀" ||
+ sleep 3; echo "tests failed"; exit 1
+
+
+ ● Bash(sleep 3; echo "数据 ✓ wide glyphs 🚀")
+   ⎿  Done · ran in the background · 3.0s
+
+ ● Bash(sleep 3; echo "tests failed"; exit 1)
+   ⎿  Exit code 1 · ran in the background · 3.0s
+
+ Done.
+
+ ● 2 background commands finished
+   ⎿  ● sleep 3; echo "数据 ✓ wide glyphs 🚀" · …
+      ● sleep 3; echo "tests failed"; exit 1 · f…
+      ctrl+o to expand
+
+ Noted the background result.
+
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+ ● Start the dev server · 11s · alt+j to manage
+/tmp/pab-qa/cwd
+↑2.5k ↓72 R6.6k W2.5k CH90.5% 2.1%/128k     faux-1
