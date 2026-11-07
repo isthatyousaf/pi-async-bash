@@ -1,7 +1,7 @@
 /**
  * pi-async-bash: replaces Pi's `bash` tool with one whose processes are owned by a session job
  * manager. A command returns when it finishes, or is handed off to the background after a short
- * user-configured foreground budget (default 2 s). Background completion is delivered to the model
+ * user-configured foreground budget (default 30 s). Background completion is delivered to the model
  * once, through session boundaries or a triggered turn. `bash_job` lists, waits for, and stops jobs.
  */
 import { statSync } from "node:fs";
@@ -50,7 +50,7 @@ const WAIT_DEFAULT_SECONDS = 30;
 const WAIT_MAX_SECONDS = 600;
 const STOP_WAIT_MS = 5000;
 const LOG_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
-const DEFAULT_FOREGROUND_MS = 2000;
+const DEFAULT_FOREGROUND_MS = 30_000;
 
 export interface AsyncBashConfig {
 	/** Automatic handoff budget in ms; null waits for completion (explicit background still works). */
@@ -81,7 +81,7 @@ export function parseForegroundMs(raw: string | undefined): number | null | unde
 
 /**
  * Resolve user configuration. Precedence: `--bash-foreground-ms` flag, then
- * `PI_ASYNC_BASH_FOREGROUND_MS`, then the mode default (2000 ms; off in one-shot print/json mode,
+ * `PI_ASYNC_BASH_FOREGROUND_MS`, then the mode default (30000 ms; off in one-shot print/json mode,
  * where Pi exits after the run and would kill handed-off jobs).
  */
 export function resolveConfig(flag: string | undefined, mode: ExtensionMode | undefined, env = process.env): AsyncBashConfig {
@@ -581,12 +581,12 @@ export default function asyncBash(pi: ExtensionAPI): void {
 		label: "bash",
 		description:
 			"Execute a bash command in the current working directory. Returns stdout and stderr (last 2000 lines or 50KB; the full log path is given when truncated). " +
-			"A command still running after a short foreground wait keeps running as a background job: the result then reports it as running, with a job ID and log path, and you are notified when it finishes. " +
+			"A command still running after a foreground wait (about 30 s by default) keeps running as a background job: the result then reports it as running, with a job ID and log path, and you are notified when it finishes. " +
 			"Set run_in_background to start it in the background immediately. Optionally provide a timeout in seconds: a hard deadline that also applies in the background. Manage jobs with bash_job.",
 		promptSnippet: "Execute bash commands (ls, grep, find, etc.); long commands continue as background jobs",
 		promptGuidelines: [
 			"You can inspect PI_* environment variables for current model and session details.",
-			"bash waits briefly for a command (about 2 s by default); if it is still running, the result says it moved to the background as a job. That job has NOT completed: wait for the completion notice (or bash_job wait) before relying on its outcome.",
+			"bash waits for a command (about 30 s by default); if it is still running, the result says it moved to the background as a job. That job has NOT completed: wait for the completion notice (or bash_job wait) before relying on its outcome.",
 			"Use run_in_background for servers, watchers, and long builds instead of shell `&`; stop jobs you no longer need with bash_job stop.",
 			"In headless runs, pending background jobs are joined before the process exits. Stop servers and watchers you no longer need before finishing your task.",
 		],

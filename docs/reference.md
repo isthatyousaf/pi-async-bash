@@ -4,7 +4,7 @@ Back to the [README](../README.md).
 
 A Pi extension that replaces the `bash` tool with one whose processes belong to a session job manager, and adds a `bash_job` tool.
 
-- A command that finishes within the foreground budget (default 2 s) returns like Pi's builtin `bash`: bounded output and exit status; a nonzero exit is a tool error.
+- A command that finishes within the foreground budget (default 30 s) returns like Pi's builtin `bash`: bounded output and exit status; a nonzero exit is a tool error.
 - A command still running at the budget keeps running as a background job. The tool returns a job ID, `running` status, and the full log path. The result says the command has **not** completed.
 - `run_in_background: true` returns as soon as the process has launched.
 - When a background job finishes, the model is told once: job ID, exit status or kill reason, the last 20 lines (2 KB), and the log path.
@@ -14,7 +14,7 @@ A Pi extension that replaces the `bash` tool with one whose processes belong to 
 
 **Arguments.** `command`, optional `timeout` (seconds), optional `run_in_background`, optional `description` (display label only). The timeout is a hard deadline counted from launch. It still applies after the job moves to the background, and the process tree is killed when it expires. Values must be finite, positive, and at most 2147483.647 s. Omitted means no deadline, as in the builtin. Without a deadline, a background job runs until it exits or is stopped, or the session ends.
 
-**Foreground budget.** The budget is wall-clock time from launch; output does not extend it. Only the user sets it, with `--bash-foreground-ms <ms|off>` or `PI_ASYNC_BASH_FOREGROUND_MS`; the flag wins. `off` (or `0`) waits for completion, as the builtin does; `run_in_background` still works. One-shot `print`/`json` modes keep the synchronous default. Set `--bash-foreground-ms 2000` to opt into automatic handoff there.
+**Foreground budget.** The budget is wall-clock time from launch; output does not extend it. Only the user sets it, with `--bash-foreground-ms <ms|off>` or `PI_ASYNC_BASH_FOREGROUND_MS`; the flag wins. `off` (or `0`) waits for completion, as the builtin does; `run_in_background` still works. One-shot `print`/`json` modes keep the synchronous default. Set `--bash-foreground-ms 30000` to opt into automatic handoff there.
 
 **Headless completion.** Print/JSON runs can continue other tool work while a background job runs. If the model tries to finish with pending jobs, the final `turn_end` waits for the next result, delivers it, and requests a model continuation. This happens before `agent_end`, so auto-exiting hosts do not close early. Waiting uses no model requests or polling tool calls; it keeps Node alive and releases on run abort or session shutdown. All pending results are delivered before normal exit. Jobs without execution deadlines can wait indefinitely, so stop unneeded servers and watchers before finishing. Interactive and RPC sessions do not wait at this boundary.
 
@@ -71,7 +71,7 @@ Reproduce the captures in `qa/captures/` (real Pi TUI in an isolated tmux server
 ## Differences
 
 From Claude Code's Bash:
-- Pi hands off automatically after 2 s. In Claude, 2 s only starts progress display; automatic backgrounding happens at the timeout.
+- Pi hands off automatically after the foreground budget (30 s by default). In Claude, 2 s only starts progress display; automatic backgrounding happens at the timeout.
 - `timeout` is in seconds, as in Pi, not milliseconds.
 - Shortcuts are `ctrl+alt+b` (background) and `alt+j` (jobs), not Ctrl+B and Down.
 - Collapsed output shows the tail, not the head, in both live and final rows.

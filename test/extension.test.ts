@@ -42,8 +42,8 @@ describe("registration and config", () => {
 		assert.equal(parseForegroundMs("0"), null);
 		assert.equal(parseForegroundMs("1500"), 1500);
 		assert.throws(() => parseForegroundMs("2s"));
-		assert.equal(resolveConfig(undefined, "tui", {}).foregroundMs, 2000);
-		assert.equal(resolveConfig(undefined, "rpc", {}).foregroundMs, 2000);
+		assert.equal(resolveConfig(undefined, "tui", {}).foregroundMs, 30_000);
+		assert.equal(resolveConfig(undefined, "rpc", {}).foregroundMs, 30_000);
 		assert.equal(resolveConfig(undefined, "print", {}).foregroundMs, null);
 		assert.equal(resolveConfig(undefined, "json", { PI_ASYNC_BASH_FOREGROUND_MS: "700" }).foregroundMs, 700);
 		assert.equal(resolveConfig("900", "tui", { PI_ASYNC_BASH_FOREGROUND_MS: "700" }).foregroundMs, 900);

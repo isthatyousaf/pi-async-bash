@@ -25,8 +25,9 @@ snap 01-live-foreground
 snap 02-manual-background-widget
 sleep 9; snap 03-background-completion
 
+# The captures below expect automatic handoff after 2 s, not the 30 s default.
 # 2. Outcomes: success with long output, empty, failure, timeout, guard-free interrupt.
-"$Q" start 100 46; sleep 3
+"$Q" start 100 46 --bash-foreground-ms 2000; sleep 3
 "$Q" send 'run seq 1 40'; sleep 1.2
 "$Q" send 'run true'; sleep 1.2
 "$Q" send 'run echo "warning: unused import" >&2; echo "error: build failed"; exit 2'; sleep 1.2
@@ -35,7 +36,7 @@ sleep 9; snap 03-background-completion
 snap 04-outcomes
 
 # 3. Several background commands, widget, coalesced notice, jobs panel with a scrolled log.
-"$Q" start 110 34; sleep 3
+"$Q" start 110 34 --bash-foreground-ms 2000; sleep 3
 "$Q" send 'desc Start the dev server :: for i in $(seq 1 500); do echo "GET /api/items 200 ${i}ms"; sleep 0.2; done'; sleep 1.5
 "$Q" send 'two sleep 3; echo "数据 ✓ wide glyphs 🚀" || sleep 3; echo "tests failed"; exit 1'; sleep 5
 snap 05-multi-background-notice
@@ -55,7 +56,7 @@ snap 10-narrow-panel
 "$Q" keys Escape
 
 # 5. Light theme and regular (non-fullscreen) mode.
-QA_THEME=light "$Q" start 100 22; sleep 3
+QA_THEME=light "$Q" start 100 22 --bash-foreground-ms 2000; sleep 3
 "$Q" send 'run echo light; exit 2'; sleep 1.2
 "$Q" send 'bg sleep 30'; sleep 1.5
 snap 11-light light
