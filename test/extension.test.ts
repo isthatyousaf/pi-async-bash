@@ -29,6 +29,8 @@ describe("registration and config", () => {
 		const params = (rt.tools.get("bash") as any).parameters;
 		assert.deepEqual(Object.keys(params.properties).sort(), ["command", "description", "notify", "run_in_background", "timeout"]);
 		assert.deepEqual(params.required, ["command"]);
+		const guidelines = ((rt.tools.get("bash") as any).promptGuidelines as string[]).join("\n");
+		assert.match(guidelines, /notify: false jobs are not waited for and are stopped when a headless run ends/);
 	});
 
 	test("timeout validation in seconds", () => {

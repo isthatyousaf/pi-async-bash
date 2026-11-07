@@ -625,7 +625,7 @@ export default function asyncBash(pi: ExtensionAPI): void {
 			"bash waits for a command (about 30 s by default); if it is still running, the result says it moved to the background as a job. That job has NOT completed: wait for the completion notice (or bash_job wait) before relying on its outcome.",
 			"Use run_in_background for servers, watchers, and long builds instead of shell `&`; stop jobs you no longer need with bash_job stop.",
 			"bash calls made from a codemode script wait for the command to finish (no automatic background handoff), so the script needs no bash_job wait; run_in_background still returns at once.",
-			"For fire-and-forget cleanup or timers whose result you do not need, set notify: false (usually with run_in_background) so their completion does not start another turn; bash_job can still check them.",
+			"For fire-and-forget cleanup or timers whose result you do not need, set notify: false (usually with run_in_background) so their completion does not start another turn; bash_job can still check them. notify: false jobs are not waited for and are stopped when a headless run ends.",
 			"In headless runs, pending background jobs are joined before the process exits. Stop servers and watchers you no longer need before finishing your task.",
 		],
 		parameters: bashSchema,
