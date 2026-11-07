@@ -33,7 +33,7 @@ Restart Pi or run `/reload`. Requires **Pi 1.1.0+**. Tested on Linux.
 | `x`, then `x` | Stop the selected job |
 | `Esc` | Close the panel |
 
-The agent keeps using `bash`. It can also set `run_in_background: true` and use `bash_job` to list, inspect, wait for, or stop jobs. No polling is needed for completion notices. Calls from codemode scripts wait for the command to finish instead of handing off.
+The agent keeps using `bash`. It can also set `run_in_background: true` (with `notify: false` for fire-and-forget cleanup) and use `bash_job` to list, inspect, wait for, or stop jobs. No polling is needed for completion notices. Calls from codemode scripts wait for the command to finish instead of handing off.
 
 ## Configure
 

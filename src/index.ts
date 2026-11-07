@@ -138,6 +138,12 @@ const bashSchema = Type.Object({
 				"Start the command as a background job and return right away with its job ID and log path. Use for servers, watchers, and long builds.",
 		}),
 	),
+	notify: Type.Optional(
+		Type.Boolean({
+			description:
+				"Send a completion notice if the command finishes in the background (default true). Set false for fire-and-forget cleanup or timers whose result you do not need.",
+		}),
+	),
 });
 
 const bashOutputSchema = Type.Object({
@@ -538,7 +544,9 @@ export default function asyncBash(pi: ExtensionAPI): void {
 					: `Command started in the background as job ${info.id}. It has NOT completed.`,
 			`Full output log: ${info.logPath}`,
 			info.timeoutMs ? `It will be killed if still running ${info.timeoutMs / 1000} seconds after launch.` : undefined,
-			`You will be notified when it finishes. To check, wait, or stop it, call bash_job with job_id "${info.id}"; read the log file for output.`,
+			job.notify
+				? `You will be notified when it finishes. To check, wait, or stop it, call bash_job with job_id "${info.id}"; read the log file for output.`
+				: `No completion notice will be sent (notify: false). To check, wait, or stop it, call bash_job with job_id "${info.id}"; read the log file for output.`,
 			tail?.text ? `Output so far${tail.truncated ? " (end)" : ""}:\n${tail.text}` : undefined,
 		].filter((line): line is string => line !== undefined);
 		return {
@@ -616,6 +624,7 @@ export default function asyncBash(pi: ExtensionAPI): void {
 			"bash waits for a command (about 30 s by default); if it is still running, the result says it moved to the background as a job. That job has NOT completed: wait for the completion notice (or bash_job wait) before relying on its outcome.",
 			"Use run_in_background for servers, watchers, and long builds instead of shell `&`; stop jobs you no longer need with bash_job stop.",
 			"bash calls made from a codemode script wait for the command to finish (no automatic background handoff), so the script needs no bash_job wait; run_in_background still returns at once.",
+			"For fire-and-forget cleanup or timers whose result you do not need, set notify: false (usually with run_in_background) so their completion does not start another turn; bash_job can still check them.",
 			"In headless runs, pending background jobs are joined before the process exits. Stop servers and watchers you no longer need before finishing your task.",
 		],
 		parameters: bashSchema,
@@ -636,6 +645,7 @@ export default function asyncBash(pi: ExtensionAPI): void {
 				env: buildEnv(ctx),
 				timeoutMs,
 				background: params.run_in_background === true,
+				notify: params.notify !== false,
 			});
 
 			if (params.run_in_background === true) {

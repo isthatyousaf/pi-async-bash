@@ -33,6 +33,7 @@ function info(over: Partial<JobInfo> = {}): JobInfo {
 		logBytes: 0,
 		logDeleted: false,
 		delivered: false,
+		notify: true,
 		pid: 4242,
 		...over,
 	};

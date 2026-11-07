@@ -7,7 +7,8 @@ import { type JobManager, MAX_TIMER_MS } from "./manager.ts";
  */
 export async function waitForBackgroundResult(manager: JobManager, signal?: AbortSignal): Promise<void> {
 	while (!manager.isDisposed && !signal?.aborted) {
-		const jobs = manager.list().filter((job) => job.running && job.owner === "background");
+		// Jobs started without a completion notice do not hold the exit; session shutdown stops them.
+		const jobs = manager.list().filter((job) => job.running && job.owner === "background" && job.notify);
 		if (jobs.length === 0) return;
 		const waiting = new AbortController();
 		const abort = () => waiting.abort();

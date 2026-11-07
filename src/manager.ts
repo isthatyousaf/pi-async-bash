@@ -51,6 +51,8 @@ export interface JobSpec {
 	timeoutMs?: number;
 	/** Start owned by the background (explicit `run_in_background`). */
 	background?: boolean;
+	/** Report a background completion through `onBackgroundComplete` (default true). */
+	notify?: boolean;
 }
 
 export interface JobInfo {
@@ -70,6 +72,7 @@ export interface JobInfo {
 	logBytes: number;
 	logDeleted: boolean;
 	delivered: boolean;
+	notify: boolean;
 	pid?: number;
 }
 
@@ -111,6 +114,8 @@ export class Job {
 	readonly logPath: string;
 	readonly startedAt: number;
 	readonly timeoutMs: number | undefined;
+	/** False when the caller asked for no completion notice. */
+	readonly notify: boolean;
 	status: JobStatus = "running";
 	owner: JobOwner;
 	exitCode: number | null = null;
@@ -145,6 +150,7 @@ export class Job {
 		this.logPath = logPath;
 		this.startedAt = startedAt;
 		this.timeoutMs = spec.timeoutMs;
+		this.notify = spec.notify !== false;
 		this.owner = spec.background ? "background" : "foreground";
 		this.done = new Promise((resolve) => {
 			this.resolveDone = resolve;
@@ -176,6 +182,7 @@ export class Job {
 			logBytes: this.logBytes,
 			logDeleted: this.logDeleted,
 			delivered: this.delivered,
+			notify: this.notify,
 			pid: this.pid,
 		};
 	}
@@ -584,6 +591,8 @@ export class JobManager {
 			this.trimLog(job);
 		}
 		job.status = status;
+		// Nobody will be told about a background job without notice, so retention treats it as delivered.
+		if (job.owner === "background" && !job.notify) job.delivered = true;
 		job.resolveLaunched(status !== "spawn_error");
 		// Disk accounting and retention run before anyone observes the result.
 		this.enforceRetention();

@@ -47,6 +47,21 @@ describe("JobManager", () => {
 		assert.equal(completed.length, 0, "foreground-owned jobs are not reported as background completions");
 	});
 
+	test("a background job without notice is not reported and counts as delivered", async () => {
+		const { mgr, completed } = make();
+		const quiet = mgr.start({ command: "true", cwd: "/", background: true, notify: false });
+		const handed = mgr.start({ command: "sleep 0.2", cwd: "/", notify: false });
+		assert.equal(mgr.handoff(handed), true);
+		await Promise.all([quiet.done, handed.done]);
+		assert.equal(completed.length, 0);
+		assert.equal(quiet.delivered, true);
+		assert.equal(handed.delivered, true);
+		const loud = mgr.start({ command: "true", cwd: "/", background: true });
+		await loud.done;
+		assert.equal(completed.length, 1);
+		assert.equal(loud.info().notify, true);
+	});
+
 	test("nonzero and signal exits", async () => {
 		const { mgr } = make();
 		assert.equal((await mgr.start({ command: "exit 3", cwd: "/" }).done).exitCode, 3);

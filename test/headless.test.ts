@@ -74,6 +74,26 @@ test("headless join waits for the first result without stopping other jobs", asy
 	}
 });
 
+test("headless join does not wait for jobs started without a notice", async () => {
+	const root = mkdtempSync(join(tmpdir(), "pab-quiet-join-"));
+	const manager = new JobManager({ logDir: root, shell: "/bin/bash", shellArgs: ["-c"], unref: true });
+	try {
+		const quiet = manager.start({ command: "sleep 4", cwd: root, background: true, notify: false });
+		const started = Date.now();
+		await waitForBackgroundResult(manager);
+		assert.ok(Date.now() - started < 500, "returned without waiting");
+		assert.equal(quiet.running, true);
+		const loud = manager.start({ command: "sleep 0.1", cwd: root, background: true });
+		await waitForBackgroundResult(manager);
+		assert.equal(loud.running, false);
+		assert.equal(quiet.running, true);
+	} finally {
+		manager.dispose();
+		await Promise.all(manager.list().map((job) => manager.wait(job, 5000)));
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("an empty or already-aborted headless join returns without creating resources", async () => {
 	const root = mkdtempSync(join(tmpdir(), "pab-empty-join-"));
 	const manager = new JobManager({ logDir: root, shell: "/bin/bash", shellArgs: ["-c"] });

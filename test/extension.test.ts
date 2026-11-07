@@ -27,7 +27,7 @@ describe("registration and config", () => {
 		assert.deepEqual([...rt.tools.keys()].sort(), ["bash", "bash_job"]);
 		for (const name of ["exec", "wait", "exec_command", "write_stdin", "apply_patch"]) assert.equal(rt.tools.has(name), false);
 		const params = (rt.tools.get("bash") as any).parameters;
-		assert.deepEqual(Object.keys(params.properties).sort(), ["command", "description", "run_in_background", "timeout"]);
+		assert.deepEqual(Object.keys(params.properties).sort(), ["command", "description", "notify", "run_in_background", "timeout"]);
 		assert.deepEqual(params.required, ["command"]);
 	});
 
@@ -392,6 +392,23 @@ describe("delivery", () => {
 		assert.match(waited, /the wait was capped at 600 s \(the maximum\); 1800 s was requested/);
 		const plain = await rt.bash({ command: "true", run_in_background: true });
 		assert.doesNotMatch(text(await rt.job({ action: "wait", job_id: plain.details.jobId, timeout: 600 })), /capped at/);
+	});
+
+	test("notify: false sends no notice; the job stays visible to bash_job", async () => {
+		const rt = runtime();
+		const explicit = await rt.bash({ command: "sleep 0.2; echo quiet-bg", run_in_background: true, notify: false });
+		assert.match(text(explicit), /No completion notice will be sent/);
+		const auto = await rt.bash({ command: "sleep 0.6; echo quiet-auto", notify: false });
+		assert.equal(auto.details.background, true, "handed off on the budget");
+		await sleep(900);
+		assert.equal(noticeOf(rt).length, 0);
+		assert.deepEqual(await rt.emit("turn_end", { outcome: "completed" }), [undefined]);
+		assert.match(text(await rt.job({ action: "list" })), new RegExp(`${explicit.details.jobId}  exited \\(0\\)`));
+		assert.match(text(await rt.job({ action: "status", job_id: auto.details.jobId })), /quiet-auto/);
+		// A normal job next to them is still announced.
+		await rt.bash({ command: "sleep 0.1; echo loud", run_in_background: true });
+		await waitFor(() => noticeOf(rt).length === 1, 3000, "notice");
+		assert.doesNotMatch(noticeOf(rt)[0]!.message.content, /quiet/);
 	});
 
 	test("simultaneous completions are coalesced into one notice", async () => {
