@@ -371,8 +371,16 @@ describe("delivery", () => {
 		const waited = await rt.job({ action: "wait", job_id: result.details.jobId, timeout: 0.3 });
 		assert.ok(Date.now() - started < 1000);
 		assert.match(text(waited), /still running/);
+		await assert.rejects(
+			rt.job({ action: "status", job_id: "job-404" }),
+			(err: Error) =>
+				err.message.includes("Unknown job job-404") &&
+				err.message.includes(`${result.details.jobId} (running)`) &&
+				/Job IDs come only from bash results/.test(err.message),
+		);
 		await rt.job({ action: "stop", job_id: result.details.jobId });
-		await assert.rejects(rt.job({ action: "status", job_id: "job-404" }), /Unknown job/);
+		await assert.rejects(rt.job({ action: "wait", job_id: "job-99-ffff" }), new RegExp(`${result.details.jobId} \\(stopped\\)`));
+		await assert.rejects(runtime("no-jobs").job({ action: "status", job_id: "job-1-0000" }), /This session has no background jobs/);
 		await assert.rejects(rt.job({ action: "wait" }), /job_id is required/);
 	});
 

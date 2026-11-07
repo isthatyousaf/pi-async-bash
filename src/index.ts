@@ -193,6 +193,19 @@ function statusPhrase(info: JobInfo, stoppedByUser = false): string {
 	}
 }
 
+const UNKNOWN_JOB_LISTED = 20;
+
+/** Models guess IDs (for example in the same parallel batch as the bash call), so show the real ones. */
+function unknownJobMessage(id: string, known: Job[]): string {
+	const recent = known.slice(-UNKNOWN_JOB_LISTED);
+	const more = known.length - recent.length;
+	const list =
+		recent.length === 0
+			? "This session has no background jobs."
+			: `Jobs in this session: ${recent.map((job) => `${job.id} (${job.status})`).join(", ")}${more > 0 ? `, and ${more} older` : ""}.`;
+	return `Unknown job ${id}. ${list} Job IDs come only from bash results (job_id); do not guess them. Jobs belong to the current session, and finished jobs are kept for a limited time.`;
+}
+
 function errorForStatus(info: JobInfo): string | undefined {
 	switch (info.status) {
 		case "exited":
@@ -713,7 +726,7 @@ export default function asyncBash(pi: ExtensionAPI): void {
 			}
 			if (!params.job_id) throw new Error(`job_id is required for ${params.action}`);
 			const job = listed(mgr?.get(params.job_id));
-			if (!mgr || !job) throw new Error(`Unknown job ${params.job_id} (jobs belong to the current session; finished jobs are kept for a limited time).`);
+			if (!mgr || !job) throw new Error(unknownJobMessage(params.job_id, (mgr?.list() ?? []).filter((known) => listed(known))));
 
 			if (params.action === "stop") {
 				if (job.running) {
