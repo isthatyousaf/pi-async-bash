@@ -470,6 +470,8 @@ export function renderRowForTest(
 		isError: flags.isError,
 		durationMs: flags.durationMs,
 		outputPad: flags.outputPad,
+		keyText: () => "",
+		keyHint: (_keybinding: unknown, description: string) => description,
 	} satisfies Ctx;
 	// Like Pi: both renderers run first, then the components render.
 	const call = renderers.renderCall(input.args, theme, ctx);

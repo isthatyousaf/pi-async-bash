@@ -32,7 +32,7 @@ export default function (pi: ExtensionAPI) {
 	faux.setResponses(Array.from({ length: 12 }, () => respond));
 	pi.registerProvider(faux.provider as never);
 	pi.on("before_agent_start", (event, ctx) => {
-		if (event.prompt.includes("case-abort")) setTimeout(() => ctx.abort(), 200);
+		if (event.messageType === "user" && event.prompt.includes("case-abort")) setTimeout(() => ctx.abort(), 200);
 	});
 	// Like an auto-exiting host: waiting until agent_before_settle is too late.
 	pi.on("agent_end", (_event, ctx) => ctx.shutdown());
