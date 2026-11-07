@@ -471,7 +471,21 @@ export default function asyncBash(pi: ExtensionAPI): void {
 		},
 	});
 
+	/**
+	 * Bash calls another tool made through `ctx.executeTool()` (codemode scripts). A script cannot
+	 * receive a completion notice, so these wait for completion instead of handing off on the budget.
+	 */
+	const nestedCalls = new Set<string>();
+	pi.on("tool_call", (event) => {
+		if (event.toolName === "bash" && event.parentToolCallId) nestedCalls.add(event.toolCallId);
+	});
+	// A call blocked by a later tool_call handler never reaches execute().
+	pi.on("tool_result", (event) => {
+		nestedCalls.delete(event.toolCallId);
+	});
+
 	pi.on("session_shutdown", () => {
+		nestedCalls.clear();
 		disposed = true;
 		ui.shutdown();
 		shutdownManager();
@@ -588,13 +602,15 @@ export default function asyncBash(pi: ExtensionAPI): void {
 			"You can inspect PI_* environment variables for current model and session details.",
 			"bash waits for a command (about 30 s by default); if it is still running, the result says it moved to the background as a job. That job has NOT completed: wait for the completion notice (or bash_job wait) before relying on its outcome.",
 			"Use run_in_background for servers, watchers, and long builds instead of shell `&`; stop jobs you no longer need with bash_job stop.",
+			"bash calls made from a codemode script wait for the command to finish (no automatic background handoff), so the script needs no bash_job wait; run_in_background still returns at once.",
 			"In headless runs, pending background jobs are joined before the process exits. Stop servers and watchers you no longer need before finishing your task.",
 		],
 		parameters: bashSchema,
 		outputSchema: bashOutputSchema,
 		constrainedSampling: { type: "json_schema", strict: "prefer" },
-		async execute(_toolCallId, params, signal, onUpdate, ctx) {
+		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			ctxRef = ctx;
+			const nested = nestedCalls.delete(toolCallId);
 			const timeoutMs = resolveTimeoutMs(params.timeout);
 			if (signal?.aborted) throw new Error("Command aborted");
 			const mgr = ensureManager(ctx);
@@ -619,7 +635,7 @@ export default function asyncBash(pi: ExtensionAPI): void {
 				return runningResult(job, "explicit");
 			}
 
-			const budget = getConfig(ctx).foregroundMs;
+			const budget = nested ? null : getConfig(ctx).foregroundMs;
 			let budgetTimer: NodeJS.Timeout | undefined;
 			let updateTimer: NodeJS.Timeout | undefined;
 			let releaseManual: (() => void) | undefined;

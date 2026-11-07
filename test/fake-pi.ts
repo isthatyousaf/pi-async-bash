@@ -84,6 +84,7 @@ export class FakeRuntime {
 	/** Headless by default; `withUI()` switches to an interactive ("tui") context. */
 	mode = "rpc";
 	cwd = process.cwd();
+	private nestedCounter = 0;
 
 	constructor(sessionId = "session-a", flags: Record<string, string> = {}) {
 		this.sessionId = sessionId;
@@ -163,6 +164,13 @@ export class FakeRuntime {
 
 	bash(params: Record<string, unknown>, signal?: AbortSignal, onUpdate?: (u: any) => void): Promise<any> {
 		return this.tools.get("bash")!.execute("call-1", params, signal, onUpdate, this.ctx());
+	}
+
+	/** A bash call another tool made (codemode): Pi emits tool_call with parentToolCallId, then executes `<parent>/<n>`. */
+	async nestedBash(params: Record<string, unknown>, signal?: AbortSignal, onUpdate?: (u: any) => void): Promise<any> {
+		const toolCallId = `parent-${++this.nestedCounter}/1`;
+		await this.emit("tool_call", { toolName: "bash", toolCallId, parentToolCallId: toolCallId.split("/")[0], input: params });
+		return this.tools.get("bash")!.execute(toolCallId, params, signal, onUpdate, this.ctx());
 	}
 
 	job(params: Record<string, unknown>, signal?: AbortSignal): Promise<any> {

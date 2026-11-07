@@ -238,6 +238,54 @@ describe("bash tool", () => {
 	});
 });
 
+describe("nested calls (codemode scripts)", () => {
+	test("a nested call waits past the budget and returns the completed result", async () => {
+		const rt = runtime();
+		const started = Date.now();
+		const result = await rt.nestedBash({ command: "sleep 0.7; echo nested-done" });
+		assert.ok(Date.now() - started >= 650, "waited for completion");
+		assert.equal(result.details.background, undefined);
+		assert.equal(result.structuredContent.status, "exited");
+		assert.equal(text(result), "nested-done");
+		await sleep(200);
+		assert.equal(noticeOf(rt).length, 0);
+	});
+
+	test("only the nested call is exempt; the parent's own calls still hand off", async () => {
+		const rt = runtime();
+		const nested = rt.nestedBash({ command: "sleep 0.6" });
+		const own = await rt.bash({ command: "sleep 30" });
+		assert.equal(own.details.background, true);
+		assert.equal((await nested).details.background, undefined);
+		await rt.job({ action: "stop", job_id: own.details.jobId });
+	});
+
+	test("aborting a nested call (script cancelled) kills its process tree", async () => {
+		const rt = runtime();
+		const ac = new AbortController();
+		let latest = "";
+		const pending = rt.nestedBash({ command: "sleep 30 & echo $!; wait" }, ac.signal, (u: any) => {
+			latest = u.content.map((c: any) => c.text).join("");
+		});
+		await waitFor(() => /^\d+$/m.test(latest), 3000, "descendant pid in progress update");
+		const pid = Number(latest.trim());
+		await sleep(400); // past the 300 ms budget: still in the foreground
+		assert.ok(alive(pid));
+		ac.abort();
+		await assert.rejects(pending, /Command aborted/);
+		await waitFor(() => !alive(pid), 3000, "descendant to die");
+	});
+
+	test("run_in_background from a script still returns at once", async () => {
+		const rt = runtime();
+		const started = Date.now();
+		const result = await rt.nestedBash({ command: "sleep 0.3; echo nested-bg", run_in_background: true });
+		assert.ok(Date.now() - started < 250);
+		assert.equal(result.details.background, true);
+		await waitFor(() => noticeOf(rt).length === 1, 3000, "notification");
+	});
+});
+
 describe("delivery", () => {
 	test("busy agent: delivered once at turn_end through a boundary entry", async () => {
 		const rt = runtime();

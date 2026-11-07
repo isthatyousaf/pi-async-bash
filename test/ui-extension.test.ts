@@ -97,6 +97,20 @@ describe("manual background handoff", () => {
 		assert.match(noticeOf(rt)[0]!.message.content, /manual-done/);
 	});
 
+	test("a nested (codemode) call can still be moved to the background by the user", async () => {
+		const rt = runtime("manual-nested");
+		await rt.emit("session_start", { reason: "startup" });
+		const updates: any[] = [];
+		const pending = rt.nestedBash({ command: "sleep 1.2; echo nested-manual" }, undefined, (u: any) => updates.push(u));
+		await waitFor(() => updates.length > 0, 2000, "first update");
+		await sleep(450); // past the 300 ms budget, which nested calls ignore
+		await rt.shortcuts.get(BACKGROUND_KEY)!.handler(rt.ctx());
+		const result = await pending;
+		assert.equal(result.details.handoff, "manual");
+		await waitFor(() => noticeOf(rt).length === 1, 3000, "completion notice");
+		assert.match(noticeOf(rt)[0]!.message.content, /nested-manual/);
+	});
+
 	test("with nothing in the foreground the shortcut only informs", async () => {
 		const rt = runtime("manual-none");
 		await rt.shortcuts.get(BACKGROUND_KEY)!.handler(rt.ctx());

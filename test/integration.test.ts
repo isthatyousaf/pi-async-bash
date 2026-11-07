@@ -50,6 +50,17 @@ describe("Pi integration (faux provider)", () => {
 					return { content: [{ type: "text", text: "stub" }], details: undefined };
 				},
 			});
+			// Stand-in for codemode: runs bash through ctx.executeTool(), so Pi issues a nested call.
+			pi.registerTool({
+				name: "script_stub",
+				label: "script (stub)",
+				description: "stub",
+				parameters: Type.Object({ command: Type.String() }),
+				async execute(_id, params, signal, _onUpdate, ctx) {
+					const outcome = await ctx.executeTool("bash", { command: params.command }, { signal });
+					return { content: [{ type: "text", text: JSON.stringify(outcome.result.structuredContent ?? null) }], details: undefined };
+				},
+			});
 			pi.on("tool_call", (event) => {
 				const command = (event.input as { command?: unknown }).command;
 				if (event.toolName === "bash" && typeof command === "string" && /sleep 999/.test(command)) {
@@ -148,6 +159,21 @@ describe("Pi integration (faux provider)", () => {
 		assert.match(JSON.stringify(msgs[noticeIndex].content), /quick-bg/);
 		assert.equal(msgs[noticeIndex - 1].role, "toolResult", "notice follows a tool result, never splits a tool call from its result");
 		assert.equal(msgs.filter((m) => m.role === "custom" && /quick-bg/.test(JSON.stringify(m.content))).length, 1);
+	});
+
+	test("a bash call made through ctx.executeTool waits for completion instead of handing off", async () => {
+		const callsBefore = faux.state.callCount;
+		faux.setResponses([
+			fauxAssistantMessage(fauxToolCall("script_stub", { command: "sleep 0.7; echo nested-integration" })),
+			fauxAssistantMessage(fauxText("script done")),
+		]);
+		await session.prompt("run the script");
+		await waitFor(() => session.isIdle && faux.state.callCount === callsBefore + 2, 5000, "run to settle");
+		const toolResult = session.messages.findLast((m) => m.role === "toolResult") as any;
+		const structured = JSON.parse(toolResult.content[0].text);
+		assert.equal(structured.status, "exited");
+		assert.equal(structured.output, "nested-integration");
+		assert.equal(session.messages.filter((m: any) => m.role === "custom" && /nested-integration/.test(JSON.stringify(m.content))).length, 0);
 	});
 
 	test("shortcuts, command and notice renderer register without conflicts with Pi's keys", async () => {
