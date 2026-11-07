@@ -276,6 +276,18 @@ describe("nested calls (codemode scripts)", () => {
 		await waitFor(() => !alive(pid), 3000, "descendant to die");
 	});
 
+	test("a blocked nested call (no execute, no tool_result) leaves no entry behind", async () => {
+		const rt = runtime();
+		const toolCallId = "blocked-parent/1";
+		await rt.emit("tool_call", { toolName: "bash", toolCallId, parentToolCallId: "blocked-parent", input: { command: "sleep 999" } });
+		// Pi skips execute() and afterToolCall for a blocked call, but still emits tool_execution_end.
+		await rt.emit("tool_execution_end", { toolName: "bash", toolCallId, parentToolCallId: "blocked-parent", isError: true, result: {} });
+		// Probe: a later call reusing that id must use the normal budget, not the nested wait.
+		const result = await rt.tools.get("bash")!.execute(toolCallId, { command: "sleep 30" }, undefined, undefined, rt.ctx());
+		assert.equal(result.details.background, true);
+		await rt.job({ action: "stop", job_id: result.details.jobId });
+	});
+
 	test("run_in_background from a script still returns at once", async () => {
 		const rt = runtime();
 		const started = Date.now();

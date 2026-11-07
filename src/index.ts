@@ -498,8 +498,9 @@ export default function asyncBash(pi: ExtensionAPI): void {
 	pi.on("tool_call", (event) => {
 		if (event.toolName === "bash" && event.parentToolCallId) nestedCalls.add(event.toolCallId);
 	});
-	// A call blocked by a later tool_call handler never reaches execute().
-	pi.on("tool_result", (event) => {
+	// execute() removes the entry, but a call blocked by a later tool_call handler or aborted before
+	// it runs never reaches execute() or tool_result. Pi emits tool_execution_end for every nested call.
+	pi.on("tool_execution_end", (event) => {
 		nestedCalls.delete(event.toolCallId);
 	});
 
