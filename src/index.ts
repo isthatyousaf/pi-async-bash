@@ -741,11 +741,16 @@ export default function asyncBash(pi: ExtensionAPI): void {
 				return { content: [{ type: "text", text }], details: job.info() };
 			}
 
+			let capNote: string | undefined;
 			if (params.action === "wait") {
 				const waitSeconds = params.timeout ?? WAIT_DEFAULT_SECONDS;
 				if (!Number.isFinite(waitSeconds) || waitSeconds <= 0) throw new Error("Invalid timeout: must be a positive number of seconds");
+				if (waitSeconds > WAIT_MAX_SECONDS) {
+					capNote = `Note: the wait was capped at ${WAIT_MAX_SECONDS} s (the maximum); ${waitSeconds} s was requested.`;
+				}
 				await mgr.wait(job, Math.min(waitSeconds, WAIT_MAX_SECONDS) * 1000, signal);
 			}
+			const withNote = (text: string) => (capNote ? `${text}\n${capNote}` : text);
 
 			if (job.running) {
 				const tail = mgr.tail(job, NOTIFY_TAIL_BYTES, NOTIFY_TAIL_LINES);
@@ -753,13 +758,13 @@ export default function asyncBash(pi: ExtensionAPI): void {
 					`Job ${job.id} is still running (${seconds(Date.now() - job.startedAt)} elapsed). Log: ${job.logPath}`,
 					tail.text ? `Output so far:\n${tail.text}` : "No output yet.",
 				].join("\n");
-				return { content: [{ type: "text", text }], details: job.info() };
+				return { content: [{ type: "text", text: withNote(text) }], details: job.info() };
 			}
 			job.delivered = true;
 			const info = job.info();
 			// The model asked for this result, so it gets the same tail as a foreground result, not the notice tail.
 			const text = formatCompletion(job, MODEL_TAIL_BYTES, MODEL_TAIL_LINES);
-			return { content: [{ type: "text", text }], details: info };
+			return { content: [{ type: "text", text: withNote(text) }], details: info };
 		},
 	});
 }

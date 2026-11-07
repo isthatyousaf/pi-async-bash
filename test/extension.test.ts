@@ -384,6 +384,16 @@ describe("delivery", () => {
 		await assert.rejects(rt.job({ action: "wait" }), /job_id is required/);
 	});
 
+	test("a wait above the maximum says it was capped", async () => {
+		const rt = runtime();
+		const result = await rt.bash({ command: "sleep 0.2; echo capped", run_in_background: true });
+		const waited = text(await rt.job({ action: "wait", job_id: result.details.jobId, timeout: 1800 }));
+		assert.match(waited, /capped/);
+		assert.match(waited, /the wait was capped at 600 s \(the maximum\); 1800 s was requested/);
+		const plain = await rt.bash({ command: "true", run_in_background: true });
+		assert.doesNotMatch(text(await rt.job({ action: "wait", job_id: plain.details.jobId, timeout: 600 })), /capped at/);
+	});
+
 	test("simultaneous completions are coalesced into one notice", async () => {
 		const rt = runtime();
 		await rt.bash({ command: "sleep 0.3; echo one", run_in_background: true });
