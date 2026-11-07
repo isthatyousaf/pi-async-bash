@@ -343,6 +343,27 @@ describe("delivery", () => {
 		assert.equal(noticeOf(rt).length, 0);
 	});
 
+	test("an explicitly requested result gets the foreground tail; the notice keeps the short tail", async () => {
+		const rt = runtime();
+		const command = "seq 1 3000; sleep 0.4";
+		const waitedJob = await rt.bash({ command, run_in_background: true });
+		const waited = text(await rt.job({ action: "wait", job_id: waitedJob.details.jobId, timeout: 5 }));
+		assert.match(waited, /^1001$/m);
+		assert.match(waited, /^3000$/m);
+		assert.doesNotMatch(waited, /^1000$/m);
+		assert.match(waited, /truncated, read the log for more/);
+		assert.match(waited, /Full output log: /);
+		const notified = await rt.bash({ command, run_in_background: true });
+		await waitFor(() => noticeOf(rt).length === 1, 3000, "notice");
+		const notice = noticeOf(rt)[0]!.message.content;
+		assert.match(notice, /^3000$/m);
+		assert.doesNotMatch(notice, /^2900$/m, "notice keeps its 20-line tail");
+		const status = text(await rt.job({ action: "status", job_id: notified.details.jobId }));
+		assert.match(status, /^1001$/m, "status after the notice also gets the full tail");
+		const stopped = text(await rt.job({ action: "stop", job_id: notified.details.jobId }));
+		assert.match(stopped, /^1001$/m);
+	});
+
 	test("bounded wait returns while the job keeps running", async () => {
 		const rt = runtime();
 		const result = await rt.bash({ command: "sleep 30", run_in_background: true });

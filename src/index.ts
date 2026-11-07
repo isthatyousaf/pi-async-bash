@@ -724,7 +724,7 @@ export default function asyncBash(pi: ExtensionAPI): void {
 				job.delivered = true;
 				const text = job.running
 					? `Stop requested for ${job.id}; it has not exited yet. Log: ${job.logPath}`
-					: formatCompletion(job, NOTIFY_TAIL_BYTES, NOTIFY_TAIL_LINES);
+					: formatCompletion(job, MODEL_TAIL_BYTES, MODEL_TAIL_LINES);
 				return { content: [{ type: "text", text }], details: job.info() };
 			}
 
@@ -744,7 +744,8 @@ export default function asyncBash(pi: ExtensionAPI): void {
 			}
 			job.delivered = true;
 			const info = job.info();
-			const text = formatCompletion(job, NOTIFY_TAIL_BYTES, NOTIFY_TAIL_LINES);
+			// The model asked for this result, so it gets the same tail as a foreground result, not the notice tail.
+			const text = formatCompletion(job, MODEL_TAIL_BYTES, MODEL_TAIL_LINES);
 			return { content: [{ type: "text", text }], details: info };
 		},
 	});
