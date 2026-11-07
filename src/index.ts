@@ -209,11 +209,17 @@ function unknownJobMessage(id: string, known: Job[]): string {
 	const running = known.filter((job) => job.running);
 	const finished = known.filter((job) => !job.running).sort((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0));
 	const recent = [...running, ...finished].slice(0, UNKNOWN_JOB_LISTED);
-	const more = known.length - recent.length;
+	const cutRunning = Math.max(0, running.length - UNKNOWN_JOB_LISTED);
+	const cutFinished = known.length - recent.length - cutRunning;
+	const plural = (n: number, what: string) => `${n} ${what} job${n === 1 ? "" : "s"}`;
+	const cut = [
+		cutRunning > 0 ? plural(cutRunning, "more running") : undefined,
+		cutFinished > 0 ? plural(cutFinished, "older finished") : undefined,
+	].filter((part): part is string => part !== undefined);
 	const list =
 		recent.length === 0
 			? "This session has no background jobs."
-			: `Jobs in this session: ${recent.map((job) => `${job.id} (${job.status})`).join(", ")}${more > 0 ? `, and ${more} older finished jobs` : ""}.`;
+			: `Jobs in this session: ${recent.map((job) => `${job.id} (${job.status})`).join(", ")}${cut.length > 0 ? `, and ${cut.join(" and ")}` : ""}.`;
 	return `Unknown job ${id}. ${list} Job IDs come only from bash results (job_id); do not guess them. Jobs belong to the current session, and finished jobs are kept for a limited time.`;
 }
 

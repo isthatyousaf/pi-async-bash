@@ -431,6 +431,25 @@ describe("delivery", () => {
 		}
 	});
 
+	test("unknown job: running jobs cut by the cap are counted as running, not finished", async () => {
+		process.env.PI_ASYNC_BASH_MAX_JOBS = "30";
+		const rt = runtime("unknown-many-running");
+		const ids: string[] = [];
+		try {
+			const done = await rt.bash({ command: "true", run_in_background: true, notify: false });
+			await rt.job({ action: "wait", job_id: done.details.jobId, timeout: 5 });
+			for (let i = 0; i < 22; i++) ids.push((await rt.bash({ command: "sleep 30", run_in_background: true, notify: false })).details.jobId);
+			await assert.rejects(rt.job({ action: "status", job_id: "job-999-zzzz" }), (err: Error) => {
+				assert.match(err.message, /, and 2 more running jobs and 1 older finished job\./);
+				assert.doesNotMatch(err.message, new RegExp(`${done.details.jobId} `), "the finished job is cut first");
+				return true;
+			});
+		} finally {
+			delete process.env.PI_ASYNC_BASH_MAX_JOBS;
+			for (const id of ids) await rt.job({ action: "stop", job_id: id });
+		}
+	});
+
 	test("a wait above the maximum says it was capped", async () => {
 		const rt = runtime();
 		const result = await rt.bash({ command: "sleep 0.2; echo capped", run_in_background: true });
