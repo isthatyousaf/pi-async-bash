@@ -740,6 +740,8 @@ export default function asyncBash(pi: ExtensionAPI): void {
 			if (!mgr || !job) throw new Error(unknownJobMessage(params.job_id, (mgr?.list() ?? []).filter((known) => listed(known))));
 
 			if (params.action === "stop") {
+				// Only a result that was already final when the model asked gets the full tail.
+				const finishedAtCall = !job.running;
 				if (job.running) {
 					job.delivered = true;
 					void mgr.requestStop(job, "stopped");
@@ -748,7 +750,9 @@ export default function asyncBash(pi: ExtensionAPI): void {
 				job.delivered = true;
 				const text = job.running
 					? `Stop requested for ${job.id}; it has not exited yet. Log: ${job.logPath}`
-					: formatCompletion(job, MODEL_TAIL_BYTES, MODEL_TAIL_LINES);
+					: finishedAtCall
+						? formatCompletion(job, MODEL_TAIL_BYTES, MODEL_TAIL_LINES)
+						: formatCompletion(job, NOTIFY_TAIL_BYTES, NOTIFY_TAIL_LINES);
 				return { content: [{ type: "text", text }], details: job.info() };
 			}
 

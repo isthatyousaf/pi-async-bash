@@ -376,6 +376,17 @@ describe("delivery", () => {
 		assert.match(stopped, /^1001$/m);
 	});
 
+	test("stopping a chatty running job keeps the short notice tail", async () => {
+		const rt = runtime();
+		const result = await rt.bash({ command: "seq 1 3000; echo READY; sleep 30", run_in_background: true });
+		await waitFor(() => fs.readFileSync(result.details.logPath, "utf8").includes("READY"), 3000, "output written");
+		const stopped = text(await rt.job({ action: "stop", job_id: result.details.jobId }));
+		assert.match(stopped, /was stopped/);
+		assert.match(stopped, /^READY$/m);
+		assert.match(stopped, /^2990$/m);
+		assert.doesNotMatch(stopped, /^2900$/m, "a stop of a running job keeps the 20-line tail");
+	});
+
 	test("bounded wait returns while the job keeps running", async () => {
 		const rt = runtime();
 		const result = await rt.bash({ command: "sleep 30", run_in_background: true });
