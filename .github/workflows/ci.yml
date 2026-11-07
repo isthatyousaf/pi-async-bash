@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+      # Development dependencies only; Pi supplies the peer packages.
+      - run: bun install --frozen-lockfile --omit peer
+      - run: npm install --global @earendil-works/pi-coding-agent
+      - run: sh scripts/link-pi.sh
+      - run: npm run check

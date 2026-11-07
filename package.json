@@ -23,7 +23,8 @@
   "scripts": {
     "link-pi": "sh scripts/link-pi.sh",
     "typecheck": "tsc --noEmit -p .",
-    "test": "node --test --test-concurrency=1 test/*.test.ts"
+    "test": "node --test --test-concurrency=1 test/*.test.ts",
+    "check": "npm run typecheck && npm test"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
