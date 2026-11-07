@@ -409,6 +409,28 @@ describe("delivery", () => {
 		await assert.rejects(rt.job({ action: "wait" }), /job_id is required/);
 	});
 
+	test("unknown job: an old running job stays listed ahead of newer finished ones", async () => {
+		const rt = runtime("unknown-order");
+		const server = await rt.bash({ command: "sleep 30", run_in_background: true, notify: false });
+		const quick: string[] = [];
+		for (let i = 0; i < 22; i++) {
+			const job = await rt.bash({ command: "true", run_in_background: true, notify: false });
+			await rt.job({ action: "wait", job_id: job.details.jobId, timeout: 5 });
+			quick.push(job.details.jobId);
+		}
+		try {
+			await assert.rejects(rt.job({ action: "status", job_id: "job-999-zzzz" }), (err: Error) => {
+				const listed = err.message.slice(err.message.indexOf("Jobs in this session:"));
+				assert.ok(listed.startsWith(`Jobs in this session: ${server.details.jobId} (running), ${quick.at(-1)} (exited)`), listed);
+				assert.match(listed, /, and 3 older finished jobs\./);
+				assert.doesNotMatch(listed, new RegExp(`${quick[0]} `), "the oldest finished jobs are cut");
+				return true;
+			});
+		} finally {
+			await rt.job({ action: "stop", job_id: server.details.jobId });
+		}
+	});
+
 	test("a wait above the maximum says it was capped", async () => {
 		const rt = runtime();
 		const result = await rt.bash({ command: "sleep 0.2; echo capped", run_in_background: true });

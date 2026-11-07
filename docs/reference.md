@@ -8,7 +8,7 @@ A Pi extension that replaces the `bash` tool with one whose processes belong to 
 - A command still running at the budget keeps running as a background job. The tool returns a job ID, `running` status, and the full log path. The result says the command has **not** completed.
 - `run_in_background: true` returns as soon as the process has launched.
 - When a background job finishes, the model is told once: job ID, exit status or kill reason, the last 20 lines (2 KB), and the log path. When the model asks for a finished job's result (`bash_job` `wait` or `status`, or `stop` on a job that had already exited), it gets the foreground tail instead: the last 2000 lines / 50 KB. Stopping a running job returns the 20-line tail.
-- `bash_job` with `action` `list`, `status`, `wait` (bounded, default 30 s, max 600 s; a longer request is capped and the result says so) or `stop` (process tree). It cannot start processes. An unknown job ID is an error that lists the session's jobs (running and retained background jobs, newest 20) with their status, and says that IDs come only from `bash` results.
+- `bash_job` with `action` `list`, `status`, `wait` (bounded, default 30 s, max 600 s; a longer request is capped and the result says so) or `stop` (process tree). It cannot start processes. An unknown job ID is an error that lists the session's jobs with their status (running jobs first, then the most recently finished background jobs, 20 at most), and says that IDs come only from `bash` results.
 
 ## Behavior
 

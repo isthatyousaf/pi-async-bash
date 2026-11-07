@@ -201,14 +201,19 @@ function statusPhrase(info: JobInfo, stoppedByUser = false): string {
 
 const UNKNOWN_JOB_LISTED = 20;
 
-/** Models guess IDs (for example in the same parallel batch as the bash call), so show the real ones. */
+/**
+ * Models guess IDs (for example in the same parallel batch as the bash call), so show the real ones:
+ * running jobs first, so an old dev server is never cut, then the most recently finished.
+ */
 function unknownJobMessage(id: string, known: Job[]): string {
-	const recent = known.slice(-UNKNOWN_JOB_LISTED);
+	const running = known.filter((job) => job.running);
+	const finished = known.filter((job) => !job.running).sort((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0));
+	const recent = [...running, ...finished].slice(0, UNKNOWN_JOB_LISTED);
 	const more = known.length - recent.length;
 	const list =
 		recent.length === 0
 			? "This session has no background jobs."
-			: `Jobs in this session: ${recent.map((job) => `${job.id} (${job.status})`).join(", ")}${more > 0 ? `, and ${more} older` : ""}.`;
+			: `Jobs in this session: ${recent.map((job) => `${job.id} (${job.status})`).join(", ")}${more > 0 ? `, and ${more} older finished jobs` : ""}.`;
 	return `Unknown job ${id}. ${list} Job IDs come only from bash results (job_id); do not guess them. Jobs belong to the current session, and finished jobs are kept for a limited time.`;
 }
 
